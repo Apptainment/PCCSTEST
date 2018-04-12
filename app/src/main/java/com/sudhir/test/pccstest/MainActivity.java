@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -93,8 +94,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class SendPostRequest extends AsyncTask<String, Void, String> {
+        String date;
+        protected void onPreExecute(){
+            if (edt != null){
+                date = edt.getText().toString();
+                if (date.isEmpty()){
+                    final Calendar c = Calendar.getInstance();
+                    int year = c.get(Calendar.YEAR);
+                    int month = c.get(Calendar.MONTH);
+                    int day = c.get(Calendar.DAY_OF_MONTH);
 
-        protected void onPreExecute(){}
+                    date =day + "/" + (month + 1) + "/" + year;
+                }
+            }else {
+                final Calendar c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                date =day + "/" + (month + 1) + "/" + year;
+            }
+        }
 
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         protected String doInBackground(String... arg0) {
@@ -103,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             String address = "https://www.skylinecms.co.uk/alpha/RemoteEngineerAPI/GetAppointmentDetails";
                 String body =
                         "<GetAppointmentDetails>" +
-                        "<CurrentDate>31/03/2018</CurrentDate>" +
+                        "<CurrentDate>"+date+"</CurrentDate>" +
                         "<SLPassword>andriodtest</SLPassword>" +
                         "<SLUsername>ON</SLUsername>" +
 
@@ -203,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
                         appointmentDetailMain.fullname= parser.nextText();
                     }
                    else if (name.equals("CustomerTitle") || name.equals("CustomerForename") || name.equals("CustomerSurname")){
-                        customerdetails = customerdetails + parser.nextText();
+                        customerdetails = customerdetails+" " + parser.nextText();
                     }
                     else if (name.equals("CustomerCompanyName") || name.equals("CustomerBuildingName")
                             || name.equals("CustomerStreet") || name.equals("CustomerAddressArea") || name.equals("CustomerAddressTown")
@@ -253,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
                 final View dialogView = inflater.inflate(R.layout.alert_settings, null);
                 alert.setView(dialogView);
                 edt = (EditText) dialogView.findViewById(R.id.editText3);
+                edt.setInputType(InputType.TYPE_NULL);
                 // disallow cancel of AlertDialog on click of back button and outside touch
                 alert.setCancelable(false);
                 Calendar dateSelected = Calendar.getInstance();
@@ -276,6 +297,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        new SendPostRequest().execute();
                                            }
                 });
                 AlertDialog dialog = alert.create();
@@ -295,14 +317,14 @@ public class MainActivity extends AppCompatActivity {
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
             DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
-            dialog.getDatePicker().setMaxDate(c.getTimeInMillis());
+            //dialog.getDatePicker().setMaxDate(c.getTimeInMillis());
             return  dialog;
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
             //btnDate.setText(ConverterDate.ConvertDate(year, month + 1, day));
 
-            edt.setText(day + " / " + (month + 1) + " / "
+            edt.setText(day + "/" + (month + 1) + "/"
                     + year);
         }
     }}
